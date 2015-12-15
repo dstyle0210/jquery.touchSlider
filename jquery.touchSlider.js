@@ -221,7 +221,6 @@
 					}else{
 						_this.opts.intervalCount = 0;
 					}
-					console.log(_this.opts.intervalCount);
 				},100);
 			};
 			

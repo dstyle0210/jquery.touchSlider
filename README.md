@@ -5,6 +5,14 @@
 - PC 브라우저에서 드래그로 사용가능 (jquery.event.drag 로드시)
 - IE7+ 지원
 
+## Dstyle's Relese
+-- "jquery 2.1.4" 로 적용.
+-- autoplay , interval 옵션 추가적용
+-- autoplay : {boolean} 기본값 false : 자동 플레이 적용
+-- interval : {millsecend , number} 기본값 3000 : 자동플레이시 간격
+-- "resize:true" 일 경우, 플리킹 외에 window.resize일 경우에도 height값이 자동적용.
+
+
 ## 기본구조
 ``` css
 #touchSlider { width:100%; height:150px; background:#ccc; position:relative; overflow:hidden; }
