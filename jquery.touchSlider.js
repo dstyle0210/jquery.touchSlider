@@ -20,6 +20,8 @@
  *		sidePage		-	사이드 페이지 사용 (default false)
  *		initComplete	-	초기화 콜백
  *		counter			-	슬라이드 콜백, 카운터
+ *		autoplay		-	자동 플레이 적용.
+ *		interval		-	자동플레이 시 시간 간격.
  *
  * @example
  
@@ -58,7 +60,11 @@
 			transition : true,
 			initComplete : null,
 			counter : null,
-			propagation : false
+			propagation : false,
+			autoplay : false,
+			interval : 3000,
+			intervalCount : 0,
+			tgHover : false
 		}, settings);
 		
 		var opts = [];
@@ -72,7 +78,7 @@
 			this.opts = opts;
 			this.init();
 			
-			$(window).bind("orientationchange resize", function () {
+			$(window).on("orientationchange resize", function () {
 				_this.resize(_this);
 			});
 		});
@@ -105,20 +111,20 @@
 			this._btn_next;
 			
 			$(this)
-					.unbind("touchstart", this.touchstart)
-					.unbind("touchmove", this.touchmove)
-					.unbind("touchend", this.touchend)
-					.unbind("touchcancel", this.touchend)
-					.unbind("dragstart", this.touchstart)
-					.unbind("drag", this.touchmove)
-					.unbind("dragend", this.touchend)
-					.bind("touchstart", this.touchstart)
-					.bind("touchmove", this.touchmove)
-					.bind("touchend", this.touchend)
-					.bind("touchcancel", this.touchend)
-					.bind("dragstart", this.touchstart)
-					.bind("drag", this.touchmove)
-					.bind("dragend", this.touchend)
+					.off("touchstart", this.touchstart)
+					.off("touchmove", this.touchmove)
+					.off("touchend", this.touchend)
+					.off("touchcancel", this.touchend)
+					.off("dragstart", this.touchstart)
+					.off("drag", this.touchmove)
+					.off("dragend", this.touchend)
+					.on("touchstart", this.touchstart)
+					.on("touchmove", this.touchmove)
+					.on("touchend", this.touchend)
+					.on("touchcancel", this.touchend)
+					.on("dragstart", this.touchstart)
+					.on("drag", this.touchmove)
+					.on("dragend", this.touchend)
 			
 			$(this).children().css({
 				"width":this._width + "px",
@@ -160,13 +166,21 @@
 			}
 			
 			if(this.opts.btn_prev && this.opts.btn_next) {
-				this.opts.btn_prev.unbind("click").bind("click", function() {
+				this.opts.btn_prev.off("click").on("click", function() {
 					_this.animate(1, true);
 					return false;
-				})
-				this.opts.btn_next.unbind("click").bind("click", function() {
+				}).on("mouseenter",function(){
+					_this.opts.tgHover = true;
+				}).on("mouseleave",function(){
+					_this.opts.tgHover = false;
+				});
+				this.opts.btn_next.off("click").on("click", function() {
 					_this.animate(-1, true);
 					return false;
+				}).on("mouseenter",function(){
+					_this.opts.tgHover = true;
+				}).on("mouseleave",function(){
+					_this.opts.tgHover = false;
 				});
 			}
 			
@@ -175,7 +189,7 @@
 					var btn_page = _this.opts.paging.eq(0).clone();
 					_this.opts.paging.before(btn_page);
 					
-					btn_page.bind("click", function(e) {
+					btn_page.on("click", function(e) {
 						_this.go_page(i, e);
 						return false;
 					});
@@ -184,11 +198,32 @@
 				this.opts.paging.remove();
 			}
 			
-			this._tg.find("a").live("click", function (e) {
+			this._tg.find("a").on("click", function (e) {
 				if(!_this._link) {
 					return false;
 				}
 			});
+
+			if(this.opts.autoplay){
+				this._tg.on("mouseenter",function(){
+					_this.opts.tgHover = true;
+				}).on("mouseleave",function(){
+					_this.opts.tgHover = false;
+				});
+				setInterval(function(){
+					if(!_this.opts.tgHover){
+						if( _this.opts.intervalCount > (_this.opts.interval/100) ){
+							_this.animate(-1, true);
+							_this.opts.intervalCount = 0;
+						}else{
+							_this.opts.intervalCount++;
+						}
+					}else{
+						_this.opts.intervalCount = 0;
+					}
+					console.log(_this.opts.intervalCount);
+				},100);
+			};
 			
 			this.initComplete();
 			this.counter();
@@ -226,7 +261,11 @@
 					});
 				}
 			}
-			
+			if(this.opts.resize) {
+				this._tg.css({
+					"height" : this._list.eq(this.opts.page-1).height() + "px"
+				});
+			}
 			this.counter();
 		},
 		
@@ -413,6 +452,7 @@
 				
 				this.counter();
 			}
+
 		},
 		
 		direction : function () { 
